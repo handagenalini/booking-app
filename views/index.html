@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <li><a href="/"></a></li>
+    </header>
+    <form class="form" action="#" id="myform" method="POST" onsubmit="savetolocal(event)" >
+    <label for="name">Name</label>
+    <input id='name'type="text" name="name">
+    <label for="email">EmailId</label>
+    <input id='email'type="email" name="email">
+    <label for="phonenumber">PhoneNumber</label>
+    
+    <input id="phonenumber" name="phonenumber">
+
+   
+    <button>Add User</button>
+</form>
+<h4 id="product" >UserList</h4>
+<ul id="listOfUsers"></ul>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+
+<script>
+    async function savetolocal(event){
+        
+        event.preventDefault()
+        try{
+        const name=event.target.name.value
+        const email=event.target.email.value
+        const phonenumber=event.target.phonenumber.value
+        // localStorage.setItem('name',name)
+        // localStorage.setItem('email',email)
+        // localStorage.setItem('phonenumber',phonenumber)
+        const obj={
+            name,
+            email,
+            phonenumber
+        }
+        
+      
+       const data=await axios.post('http://localhost:3000/adduser',obj)
+    const items=await data
+    console.log(data,'----------------')
+    console.log(items.data,'-------------------------------')
+        showUserOnScreen(items.data.newUserDetail)
+        
+    }catch(err){console.log(err)}
+    }
+    window.addEventListener("DOMContentLoaded", 
+    async () => {
+
+        try{
+        const data= await axios.get('http://localhost:3000/getdata')
+        const response=await data
+        console.log('---------------------in')
+     
+            for(var i =0; i< response.data.allUser.length; i++){
+              showUserOnScreen(response.data.allUser[i])
+            }
+        }catch(err){
+        console.log(err)
+        }
+             
+            })
+     function showUserOnScreen(user){
+        console.log(user.id)
+        document.getElementById('name').value='';
+                document.getElementById('email').value='';
+                document.getElementById('phonenumber').value='';
+                    const parentNode=document.getElementById('listOfUsers')
+                    // console.log(email,name)
+                    
+                    const childHTML=`<li id=${user.id}> ${user.name}-----${user.email}--------${user.phonenumber}  
+                        <button onclick=deleteuser('${user.id}')> delete user</button>
+                        <button onclick=edituser('${user.email}','${user.name}','${user.phonenumber}','${user.id}')>edit user</button></li>`
+
+                        parentNode.innerHTML=parentNode.innerHTML+childHTML
+                        // addition(user.name)
+                    }
+                   
+    function deleteuser(userId){
+        console.log(userId)
+        axios.delete(`http://localhost:3000/deleteuser/${userId}`)
+        .then((res)=>{
+            console.log(res)
+            removeuserfromscreen(userId)
+            // console.log(name)
+        })
+        .catch((err)=>{console.log(err)})
+                // console.log(email)
+                // localStorage.removeItem(email)
+                // removeuserfromscreen(email)
+                }
+      function removeuserfromscreen(userId){
+        
+                    const parentNode=document.getElementById('listOfUsers')
+                    const childNodeToBeDeleted=document.getElementById(userId)
+                    console.log(childNodeToBeDeleted)
+                    parentNode.removeChild(childNodeToBeDeleted)
+                    // minus(userdata)
+                  
+                }
+                function edituser(email,name,phonenumber,userId){
+                    
+                    document.getElementById('email').value=email
+                    document.getElementById('name').value=name
+                    document.getElementById('phonenumber').value=phonenumber 
+                    // minus(name)     
+                    deleteuser(userId) 
+                    console.log(name,'--------------------')  
+                    // minus(name) 
+                    
+                  
+                }
+ 
+
+</script>
+
+
+</body>
+</html>
